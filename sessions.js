@@ -15,7 +15,7 @@ const io = require('socket.io')(http);
 
 var admin = require("firebase-admin");
 
-var serviceAccount = require("annie-ai-firebase-adminsdk-gcpur-d22e969699.json");
+var serviceAccount = require("./annie-ai-firebase-adminsdk-gcpur-d22e969699.json");
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
