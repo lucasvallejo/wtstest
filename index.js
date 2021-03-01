@@ -8,8 +8,8 @@ const http = require('http').Server(express);
 const io = require('socket.io')(http);
 
 
-const PORT = process.env.PORT || 3333;
-var server = app.listen(PORT, function() {
+const PORT = process.env.PORT || 80;
+const server = app.listen(PORT, function() {
     var host = server.address().address;
     var port = server.address().port;
     console.log("server is listening at http://%s:%s", host, port);
