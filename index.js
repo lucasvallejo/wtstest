@@ -6,6 +6,15 @@ const https = require('https');
 const express = require("express");
 const http = require('http').Server(express);
 const io = require('socket.io')(http);
+
+
+const PORT = process.env.PORT || 3333;
+var server = app.listen(PORT, function() {
+    var host = server.address().address;
+    var port = server.address().port;
+    console.log("server is listening at http://%s:%s", host, port);
+});
+
 const cors = require('cors');
 const Sessions = require("./sessions");
 
