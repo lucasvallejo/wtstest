@@ -214,10 +214,24 @@ module.exports = class Sessions {
                              if (response.data.status=='n') {
                                  
                                   admin.database().ref("usuario/" + numero[0] + "/").update({"nombre": message.body});
-                                  admin.database().ref("usuario/" + numero[0] + "/").update({"status": "1"});
-                                  client.sendText(message.from, 'Bienvenid@ '+message.body+'! ¿Qué vas a pedir?\n*@entradas*\n*@platos*\n*@bebidas*\n*@postres*\n\n\n *@previa:* Mustra cuanto vas gastando\n *@cuenta:* Cierra tu cuenta y llama al mozo\n *@sal:* Solicita sal\n *@mozo:* Solicita al mozo que se hacerque a la mesa');
+                                 admin.database().ref("usuario/" + numero[0] + "/").update({"status": "1"});
+                                 
+
+client.sendText(message.from, 'Bienvenid@ '+message.body+'!, espero te encuentres de maravilla\nEstoy feliz de que quieras conocer mucho mas sobre nuestros parques nacionales¿?');
+
+                                    setTimeout(function(){
+
+                                           client.sendText(message.from, 'Muy bien '+response.data.nombre+'!, ¿Tenes pensado realizar algun tipo de actividad en particular?\n\n\n*@fauna*\n_Avistaje de fauna_\n\n*@fotos*\n_Fotografía natural_\n\n*@senderismo*\n_Recorre nuestros hermosos paisajes naturales_\n\n*@bicicleta*\n_Disfruta de los mejores destinos y recorre sus caminos en bicicleta_\n\n*@acampar*\n_Te recomendamos los mejores parques nacionales para que disfrutes de un increible campamento_\n\n');
+
+                                        
+                                            
+                                            //admin.database().ref("usuario/" + numero[0] + "/").update({"status": "1"});
                                               
-                            }
+
+                                    },3000);
+
+
+                            } 
                                
                             })
                             .catch(error => {
@@ -231,7 +245,7 @@ module.exports = class Sessions {
 
                 
 
-                if (message.body === '@foodservice') {
+                if (message.body === '@parques') {
 
 
 
@@ -246,12 +260,15 @@ module.exports = class Sessions {
                                
                              if (response.data!=null) {
                                  
-                                  client.sendText(message.from, 'Hola '+response.data.nombre+'!, espero te encuentres de maravilla\n¿Qué vas a querer comer hoy?');
+                                  client.sendText(message.from, 'Hola '+response.data.nombre+'!, espero te encuentres de maravilla\nEstoy feliz de que quieras conocer mucho mas sobre nuestros parques nacionales¿?');
 
                                     setTimeout(function(){
-                                        client.sendText(message.from, '¿Qué vas a pedir?\n*@entradas*\n*@platos*\n*@bebidas*\n*@postres*\n\n\n *@previa:* Mustra cuanto vas gastando\n *@cuenta:* Cierra tu cuenta y llama al mozo\n *@sal:* Solicita sal\n *@mozo:* Solicita al mozo que se hacerque a la mesa');
+
+                                           client.sendText(message.from, '¿Tenes pensado realizar algun tipo de actividad en particular?\n\n\n*@fauna*\n_Avistaje de fauna_\n\n*@fotos*\n_Fotografía natural_\n\n*@senderismo*\n_Recorre nuestros hermosos paisajes naturales_\n\n*@bicicleta*\n_Disfruta de los mejores destinos y recorre sus caminos en bicicleta_\n\n*@acanpar*\n_Te recomendamos los mejores parques nacionales para que disfrutes de un increible campamento_\n\n');
+
+                                        
                                             
-                                            admin.database().ref("usuario/" + numero[0] + "/").update({"status": "1"});
+                                            //admin.database().ref("usuario/" + numero[0] + "/").update({"status": "1"});
                                               
 
                                     },3000);
@@ -279,114 +296,78 @@ module.exports = class Sessions {
 
 
 
-                if (message.body === '@entradas') {
 
 
 
-                    /* consulta en firebase */
-                         var numero = message.from.split("@");
-                         axios
-                            .get('https://annie-ai.firebaseio.com/usuario/'+numero[0]+'.json?print=pretty')
-                            .then(response => {
-                               
-                                
-                             if (response.data.status==1) {
-                                 
-                                  client.sendText(message.from, 'Muy bien '+response.data.nombre+'!, ¿Que vas a querer de entrada?\n*@entrada1*\n\n*Picada caliente*\n_Papas fritas, Rabas, bastones de muzzarella,Pollor crispy, aros de cebolla_\n*$700*\n\n\n*@entrada2*\n\n*Picada Veggie*\n_Una picada del amor,con tiritas de apio y zanahoria, quesos, palmitos y morrones_\n*$500*\n\n\n');
-                                
-                                     admin.database().ref("usuario/" + numero[0] + "/").update({"status": "2"});
-                            }else{
-                                 client.sendText(message.from, 'Exelente '+response.data.nombre+', parece que ya conoces nuestros servicios!, ¿Que vas a querer de entrada?\n*@entrada1*\n\n*Picada caliente*\n_Papas fritas, Rabas, bastones de muzzarella,Pollor crispy, aros de cebolla_\n*$700*\n\n\n*@entrada2*\n\n*Picada Veggie*\n_Una picada del amor,con tiritas de apio y zanahoria, quesos, palmitos y morrones_\n*$500*\n\n\n');
-                                    
-                                     admin.database().ref("usuario/" + numero[0] + "/").update({"status": "2"});
-                             }
 
-                            
-                            
-                               
-                            })
-                            .catch(error => {
+                if (message.body === '@fauna') {
 
-                               console.log(error);
-                              
 
-                            });
+                    client.sendText(message.from, 'Genial! en este caso te recomiendo *Parque Nacional Mburucuyá*\n_Situado en la provincia de Corrientes, las oportunidades de conectar con la naturaleza en este Parque comienzan apenas se atraviesa el portal de ingreso. Rumbo al Centro Operativo, la Ruta Provincial 86 cruza los Pastizales de Santa María, donde suele avistarse el yetapá de collar. Además, en esta zona, el arroyo Portillo convoca a carpinchos, yacarés negros y tortugas de agua._\nhttps://www.youtube.com/watch?v=HtUbffpQOI4');
+                   
+                           setTimeout(function(){
 
-                            /* cierra consulta en firebase */
+                             client.sendText(message.from, '*Parque Nacional Sierra de las Quijadas*\n_Las aves no faltan en Sierras de las Quijadas, como las martinetas, el águila mora, el vencejo de collar, cóndores, águila coronada y cardenal amarillo._\nhttps://www.youtube.com/watch?v=doJ4Yu1WFVc');
+                           
+                           },3000);
+
+                }
+
+                if (message.body === '@fotos') {
+
+
+                    client.sendText(message.from, 'WOW! que linda experiencia tomar fotografias a nuestros parques.\n\n *Parque Nacional Quebrada del Condorito*\n_Al oeste de la provincia de Córdoba, en el centro de las Sierras Grandes, la naturaleza del Parque Nacional Quebrada del Condorito se convierte en un escenario perfecto para fotografiar cóndores. Desde el Balcón Norte y Balcón Sur, dos puntos de observación unidos por una pasarela que cruza el río Condorito, se pueden observar estas enormes aves que dan el nombre al área protegida._\nhttps://www.youtube.com/watch?v=msVJltfPHkk');
+                   
+                           setTimeout(function(){
+
+                             client.sendText(message.from, '*Parque Nacional Los Glaciares*\n_Ubicado al sudoeste de Santa Cruz, entre gigantes hielos continentales, una magnitud de glaciares –como el mítico Perito Moreno– contornean el paisaje que completan lagunas y ríos de deshielo, lagos, y cerros imponentes como el Torre. Aquí los amantes de la fotografía encuentran el lugar ideal para desplegar sus pasiones artísticas y capturar las mejores postales del área protegida más grande de la Argentina, declarada Sitio de Patrimonio Mundial por la UNESCO en 1981._\nhttps://www.youtube.com/watch?v=LlWuv_QarxY');
+                           
+                           },3000);
+
+                }
+
+                 if (message.body === '@senderismo') {
+
+
+                    client.sendText(message.from, 'Gran desafio!.\n\n *Parque Nacional Lago Puelo*\n_Entre volcanes, ventisqueros y lagos, se encuentra la selva valdiviana de esta área protegida ubicada en la provincia del Chubut. En el Área Recreativa, que ocupa la cabecera norte del lago Puelo, se puede disfrutar de una de las pocas playas arenosas de la región. También abordar las catorce estaciones del sendero de interpretación Bosque de las sombras, un recorrido de 400 metros autoguiado y de baja dificultad._\nhttps://www.youtube.com/watch?v=Cfit9B4SqpY');
+                   
+                           setTimeout(function(){
+
+                             client.sendText(message.from, '*Parque Nacional Lanín*\n_Esta área protegida ubicada en la provincia de Neuquén, que conserva más de 400.000 hectáreas de Bosques Patagónicos, Estepa y Altos Andes, ofrece a los viajeros más de 80 sendas para disfrutar._\nhttps://www.youtube.com/watch?v=C1Em_FR15TE');
+                           
+                           },3000);
 
                 }
 
 
+                 if (message.body === '@bicicleta') {
 
 
-                if (message.body === '@entrada1') {
-
-
-
-                    /* consulta en firebase */
-                         var numero = message.from.split("@");
-                         axios
-                            .get('https://annie-ai.firebaseio.com/usuario/'+numero[0]+'.json?print=pretty')
-                            .then(response => {
-                               
-                                
-                             if (response.data.status==2) {
-                                 
-                                  client.sendText(message.from, '*Picada caliente*\n_Papas fritas, Rabas, bastones de muzzarella,Pollor crispy, aros de cebolla_\n*$700*');
-                                  client.sendText(message.from, '¿Quieres algo de tomar?\nRecuerda escribir *@bebidas* y realizar tu pedido');
+                    client.sendText(message.from, 'Vamos a pedalear juntos!, te recomiendo estos parques.\n\n *Parque Nacional El Palmar*\n_En esta área protegida del Litoral, situada en la provincia de Entre Ríos, los senderos son custodiados por cientos de palmeras de yatay. En bicicleta se puede visitar el arroyo de Los Loros, donde se bañan carpinchos y lobitos de río, y un mirador que permite apreciar el contraste entre el paisaje natural y los campos aledaños._\nhttps://www.youtube.com/watch?v=JQpAl03CVb8');
                    
-                            }else{
-                                  client.sendText(message.from, 'Recuerda como pedir tus platos preferidos\n*@entradas*\n*@platos*\n*@bebidas*\n*@postres*\n');
-                   
-                             }
-                            
-                               
-                            })
-                            .catch(error => {
+                           setTimeout(function(){
 
-                               console.log(error);
-                              
-
-                            });
-
-                            /* cierra consulta en firebase */
+                             client.sendText(message.from, '*Parque Nacional Los Arrayanes*\n_Al sur de la provincia de Neuquén, un sendero de 12 kilómetros une Villa La Angostura con el Bosque de Arrayanes, a lo largo de la Península de Quetrihué: un camino para maravillarse ante la belleza de nuestra Patagonia y observar vistas magníficas del lago Nahuel Huapi._\nhttps://www.youtube.com/watch?v=JcfYMGQBX4Y');
+                           
+                           },3000);
 
                 }
 
-                if (message.body === '@entrada2') {
+
+                if (message.body === '@acampar') {
 
 
-
-                    /* consulta en firebase */
-                         var numero = message.from.split("@");
-                         axios
-                            .get('https://annie-ai.firebaseio.com/usuario/'+numero[0]+'.json?print=pretty')
-                            .then(response => {
-                               
-                                
-                             if (response.data.status==2) {
-                                 
-                                  client.sendText(message.from, '*Picada Veggie*\n_Una picada del amor,con tiritas de apio y zanahoria, quesos, palmitos y morrones_\n*$500*');
-                                  client.sendText(message.from, '¿Quieres algo de tomar?\nRecuerda escribir *@bebidas* y realizar tu pedido');
+                    client.sendText(message.from, 'Genial!, existen grandes lugares para acampar.\n\n *Parque Nacional Nahuel Huapi*\n_Ubicado en las provincias de Neuquén y Río Negro, el primer Parque Nacional de la Argentina convive con ciudades y villas turísticas. Sin embargo, muchos viajeros del país y del mundo prefieren acampar para vivir, aún más, el contacto con la naturaleza._\nhttps://www.youtube.com/watch?v=O0-zm7Us-fA');
                    
-                            }else{
-                                  client.sendText(message.from, 'Recuerda como pedir tus platos preferidos\n*@entradas*\n*@platos*\n*@bebidas*\n*@postres*\n');
-                   
-                             }
-                            
-                               
-                            })
-                            .catch(error => {
+                           setTimeout(function(){
 
-                               console.log(error);
-                              
-
-                            });
-
-                            /* cierra consulta en firebase */
+                             client.sendText(message.from, '*Parque Nacional Perito Moreno*\n_Este Parque, emplazado en la provincia de Santa Cruz, protege el cerro San Lorenzo, la segunda cima más alta de la Patagonia conocida como “el Everest argentino”. En el mirador que lleva su nombre, se puede acampar o pasar la noche en un nuevo refugio con capacidad para albergar hasta seis personas. La senda para llegar hasta este punto tiene una duración aproximada de 4 horas de caminata._\nhttps://www.youtube.com/watch?v=OuLcptYaPio');
+                           
+                           },3000);
 
                 }
 
+              
                 
 
 

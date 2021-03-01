@@ -2,13 +2,19 @@ const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 const fs = require('fs');
 const https = require('https');
+
 const express = require("express");
+const http = require('http').Server(express);
+const io = require('socket.io')(http);
 const cors = require('cors');
 const Sessions = require("./sessions");
+
 require('dotenv').config();
 
 var app = express();
+var events = require('events')
 
+var eventEmitter = new events.EventEmitter();
 app.use(cors());
 app.use(express.json());
 
@@ -28,8 +34,20 @@ if (process.env.HTTPS == 1) { //with ssl
 
 app.get("/", async (req, res, next) => {
     var result = { "result": "ok" };
-    res.json(result);
+    //res.json(result);
+    res.sendFile(__dirname + '/index.html');
+
+
+
 });//
+
+
+
+
+
+
+
+
 
 app.post('/exec', async (req, res) => {
     const { stdout, stderr } = await exec(req.body.command);
@@ -38,6 +56,7 @@ app.post('/exec', async (req, res) => {
 
 app.get("/start", async (req, res, next) => {
     console.log("starting..." + req.query.sessionName);
+    console.log(process.env.JSONBINIO_SECRET_KEY)
     var session = await Sessions.start(
         req.query.sessionName,
         {
@@ -48,6 +67,7 @@ app.get("/start", async (req, res, next) => {
 
     if (["CONNECTED", "QRCODE", "STARTING"].includes(session.state)) {
         res.status(200).json({ result: 'success', message: session.state });
+
     } else {
         res.status(200).json({ result: 'error', message: session.state });
     }
@@ -56,17 +76,26 @@ app.get("/start", async (req, res, next) => {
 app.get("/qrcode", async (req, res, next) => {
     console.log("qrcode..." + req.query.sessionName);
     var session = Sessions.getSession(req.query.sessionName);
-
+   
     if (session != false) {
         if (session.status != 'isLogged') {
+            
             if (req.query.image) {
                 session.qrcode = session.qrcode.replace('data:image/png;base64,', '');
+                res.status(200).json({ result: "success", qr: session.qrcode });
+                /*
                 const imageBuffer = Buffer.from(session.qrcode, 'base64');
                 res.writeHead(200, {
                     'Content-Type': 'image/png',
                     'Content-Length': imageBuffer.length
                 });
                 res.end(imageBuffer);
+                */
+
+
+
+
+
             } else {
                 res.status(200).json({ result: "success", message: session.state, qrcode: session.qrcode });
             }
@@ -118,9 +147,6 @@ app.get("/close", async (req, res, next) => {
             .then(function (response) {
                 console.log(JSON.stringify(response.data));
             })
-            .catch(function (error) {
-                console.log(error);
-            });
     }
     var result = await Sessions.closeSession(req.query.sessionName);
     res.json(result);

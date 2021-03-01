@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang = "eng">
+<head>
+    <meta charset="UTF-8">
+    <title>REGISTRAR WHATSAPP</title>
+    
+</head>
+<body>
+  
+    <h1>CONECTATE CON WHATSAPP Y COMIENZA TU EXPERIENCIA</h1>
+    <div id="messages">ESPERANDO CONEXION</div>
+    <div id="qr"></div>
+    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script type="application/javascript" src="//cdn.rawgit.com/Alorel/console-log-html/master/console-log-html.min.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script>
+
+var check = setInterval(function(){
+        $.ajax({
+        dataType: "json",
+        url: "http://localhost:9000/start/?sessionName=session1",
+        }).done(function (datx, textStatus, jqXHR) {
+           
+           console.log(datx.message)
+            
+            if (datx.message=="CONNECTED") {
+                clearInterval(check);
+                 $("#messages").html("CONECTADO")
+            }
+            if (datx.message=="STARTING") {
+                $("#messages").html("ESPERANDO CONEXION")
+            }
+
+             if (datx.message=="QRCODE") {
+                clearInterval(check);
+               
+            var qr = setInterval(function(){
+                $.ajax({
+                    dataType: "json",
+                    url: "http://localhost:9000/qrcode?sessionName=session1",
+                    }).done(function (dato, textStatus, jqXHR) {
+                       
+                        console.log(dato.message)
+                        if (dato.message=="CONNECTED") {
+                            $("#qr").empty();
+                             clearInterval(qr);
+                             $("#messages").html("CONECTADO")
+                             
+                        }else{
+                            $("#qr").html("<img src='"+dato.qrcode+"' width='300px'>");
+                        }
+                        
+
+
+                        
+                      
+                });
+
+                      },3000);
+
+            }
+          
+        });
+  },3000);
+
+
+
+
+
+       
+        
+    </script>
+</body>
+</html>
