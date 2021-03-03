@@ -7,11 +7,7 @@ const express = require("express");
 const http = require('http').Server(express);
 const io = require('socket.io')(http);
 
-var server_port = process.env.HOST_PORT || process.env.PORT || 80;
-var server_host = process.env.HOST_PORT || '0.0.0.0';
-server.listen(server_port, server_host, function() {
-    console.log('Listening on port %d', server_port);
-});
+
 
 
 
@@ -22,7 +18,7 @@ require('dotenv').config();
 
 var app = express();
 
-
+/*
 if (process.env.HTTPS == 1) { //with ssl
     https.createServer(
         {
@@ -36,6 +32,8 @@ if (process.env.HTTPS == 1) { //with ssl
         console.log("Http server running on port " + process.env.HOST_PORT);
     });
 }//http
+*/
+
 
 app.get("/", async (req, res, next) => {
     var result = { "result": "ok" };
