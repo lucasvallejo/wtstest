@@ -17,7 +17,7 @@ const store = require("store2");
 var admin = require("firebase-admin");
 
 
-var firecuenta = require(__dirname+"/annie-ai-firebase-adminsdk-gcpur-d22e969699.json");
+var firecuenta = require("/annie-ai-firebase-adminsdk-gcpur-d22e969699.json");
 
 admin.initializeApp({
   credential: admin.credential.cert(firecuenta),
