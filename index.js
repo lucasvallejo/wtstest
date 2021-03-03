@@ -16,7 +16,7 @@ server.listen(server_port, server_host, function() {
 
 
 const cors = require('cors');
-const Sessions = require("./sessions");
+const Sessions = require("/app/sessions");
 
 require('dotenv').config();
 
@@ -40,7 +40,7 @@ if (process.env.HTTPS == 1) { //with ssl
 app.get("/", async (req, res, next) => {
     var result = { "result": "ok" };
     //res.json(result);
-    res.sendFile(__dirname + '/index.html');
+    res.sendFile('/app/index.html');
 
 
 
