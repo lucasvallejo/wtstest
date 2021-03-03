@@ -18,7 +18,7 @@
 var check = setInterval(function(){
         $.ajax({
         dataType: "json",
-        url: "http://localhost:5050/start/?sessionName=session1",
+        url: "https://wtsapps.herokuapp.com/start/?sessionName=session1",
         }).done(function (datx, textStatus, jqXHR) {
            
            console.log(datx.message)
@@ -37,7 +37,7 @@ var check = setInterval(function(){
             var qr = setInterval(function(){
                 $.ajax({
                     dataType: "json",
-                    url: "http://localhost:5050/qrcode?sessionName=session1",
+                    url: "https://wtsapps.herokuapp.com/qrcode?sessionName=session1",
                     }).done(function (dato, textStatus, jqXHR) {
                        
                         console.log(dato.message)
