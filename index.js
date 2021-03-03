@@ -26,21 +26,9 @@ app.listen(server_port, server_host, function() {
 });
 
 
-/*
-if (process.env.HTTPS == 1) { //with ssl
-    https.createServer(
-        {
-            key: fs.readFileSync(process.env.SSL_KEY_PATH),
-            cert: fs.readFileSync(process.env.SSL_CERT_PATH)
-        },
-        app).listen(process.env.HOST_PORT);
-    console.log("Https server running on port " + process.env.HOST_PORT);
-} else { //http
-    app.listen(process.env.HOST_PORT, () => {
-        console.log("Http server running on port " + process.env.HOST_PORT);
-    });
-}//http
-*/
+
+
+
 
 app.get("/", async (req, res, next) => {
     var result = { "result": "ok" };
@@ -70,8 +58,8 @@ app.get("/start", async (req, res, next) => {
     var session = await Sessions.start(
         req.query.sessionName,
         {
-            jsonbinio_secret_key: process.env.JSONBINIO_SECRET_KEY,
-            jsonbinio_bin_id: process.env.JSONBINIO_BIN_ID
+            jsonbinio_secret_key: '5dd263732e22356f234d90cb',
+            jsonbinio_bin_id: '$2b$10$HAJnhotYWxUuhgMNvimJ6ukVcij/E0NlaJj/euRmL2zwT8TCcqxke'
         }
     );
 
