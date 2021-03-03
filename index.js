@@ -53,8 +53,7 @@ app.post('/exec', async (req, res) => {
 });
 
 app.get("/start", async (req, res, next) => {
-    console.log("starting..." + req.query.sessionName);
-    console.log(process.env.JSONBINIO_SECRET_KEY)
+   
     var session = await Sessions.start(
         req.query.sessionName,
         {
