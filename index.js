@@ -8,12 +8,8 @@ const http = require('http').Server(express);
 const io = require('socket.io')(http);
 
 
-const PORT = process.env.PORT || 80;
-const server = app.listen(PORT, function() {
-    var host = server.address().address;
-    var port = server.address().port;
-    console.log("server is listening at http://%s:%s", host, port);
-});
+
+
 
 const cors = require('cors');
 const Sessions = require("./sessions");
@@ -21,11 +17,7 @@ const Sessions = require("./sessions");
 require('dotenv').config();
 
 var app = express();
-var events = require('events')
 
-var eventEmitter = new events.EventEmitter();
-app.use(cors());
-app.use(express.json());
 
 if (process.env.HTTPS == 1) { //with ssl
     https.createServer(

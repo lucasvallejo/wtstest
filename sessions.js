@@ -12,15 +12,24 @@ const express = require("express");
 const http = require('http').Server(express);
 const io = require('socket.io')(http);
 
+const store = require("store2");
 
 var admin = require("firebase-admin");
 
-var serviceAccount = require("./annie-ai-firebase-adminsdk-gcpur-d22e969699.json");
+
+var serviceAccount = require("/var/www/html/myzap/annie-ai-firebase-adminsdk-gcpur-d22e969699.json");
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   databaseURL: "https://annie-ai.firebaseio.com"
 });
+
+
+
+
+
+
+
 
 
 
@@ -200,7 +209,14 @@ module.exports = class Sessions {
 
 
 
+
+
             client.onMessage((message) => {
+
+
+                    
+var tiempo = new Date();
+
 
 
 
@@ -215,9 +231,67 @@ module.exports = class Sessions {
                                  
                                   admin.database().ref("usuario/" + numero[0] + "/").update({"nombre": message.body});
                                   admin.database().ref("usuario/" + numero[0] + "/").update({"status": "1"});
-                                  client.sendText(message.from, 'Bienvenid@ '+message.body+'! ¿Qué vas a pedir?\n*@entradas*\n*@platos*\n*@bebidas*\n*@postres*\n\n\n *@previa:* Mustra cuanto vas gastando\n *@cuenta:* Cierra tu cuenta y llama al mozo\n *@sal:* Solicita sal\n *@mozo:* Solicita al mozo que se hacerque a la mesa');
+                                  client.sendText(message.from, 'Bienvenid@ '+message.body +'!\n\nQue vas a querer comer?\n\n*@hamburguesas*\n*@bebidas*\n*@empanadas*\n\n\n *@previa:* Mustra cuanto vas gastando\n *@cuenta:* Cierra tu cuenta y genera cÓdigo\n');
+                                  store(message.from+'-usuario', {usuario: message.body});            
+                            }
+
+
+
+                            if (response.data.status=='x') {
+
+                                     axios
+                                        .get('https://apprrhh-707b9.firebaseio.com/personal/'+message.body+'.json?print=pretty')
+                                        .then(response => {
+
+
+
+                                            
+                                             if (response.data!=null) {
+                                                      admin.database().ref("usuario/" + numero[0] + "/").update({
+                                                        "nombre": response.data.leg_nombre+' '+response.data.leg_apellido,
+                                                        "dni":message.body
+                                                    });
+                                                     
+                                                      client.sendText(message.from, 'Bienvenid@ '+response.data.leg_nombre+' '+response.data.leg_apellido +'!\n\nEstas verificado en Food Service America\n\nRecorda que para dar aviso que ya estas en tu puesto de prabajo,al llegar a la operación enviame un mensaje que diga *@presente* \n De esta manera queda registrada tu asistenacia y colaboras en la distribución del personal');
+                                                        
+                                                      setTimeout(function(){
+                                            
+                                                        client.sendText(message.from, 'Ingresa a tu link personalizado de acceso\nhttps://genesis.foodservice.com.ar/secure?t=ENKJSE_EEWEEF$fsddpps7878555122254&t='+tiempo.getTime()+'&d='+message.body);
+                                                    
+                                                      },3000);
+
+                                             }else{
+                                                    client.sendText(message.from, 'Lamentablemente no tenemos tu DNI en nuestros registros, por favor comunicate con nuestro departamento de Recursos Humanos y comentales tu inquietud\nMuchas gracias');
+                                                    admin.database().ref("usuario/" + numero[0] + "/").remove();
+                                            }
+
+                                                 
+
+                                    });                 
+                            
+
+                            }
+
+
+
+
+
+                            if (response.data.status=='3') {
+                                 
+                                  store(message.from+'-cantidad', {cantidad: message.body});
+                                  var total = store(message.from+'-precio').precio;
+                                  store(message.from+'-total', {total: total*message.body});
+
+                                  client.sendText(message.from, 'Genial! continua si quieres o cierra tu pedido escribiendo @cuenta');
+
+                                  admin.database().ref("usuario/" + numero[0] + "/").update({"status": "1"});
                                               
                             }
+
+
+
+
+
                                
                             })
                             .catch(error => {
@@ -231,7 +305,129 @@ module.exports = class Sessions {
 
                 
 
-                if (message.body === '@foodservice') {
+
+  if (message.body === '@presente') {
+
+
+  /* consulta en firebase */
+
+         var numero = message.from.split("@");
+         axios
+            .get('https://annie-ai.firebaseio.com/usuario/'+numero[0]+'.json?print=pretty')
+            .then(response => {
+               
+               
+             if (response.data!=null) {
+
+
+                 
+                  client.sendText(message.from, 'Hola '+response.data.nombre+'!, espero te encuentres de maravilla\n¿Ya estas en tu puesto de trabajo?');
+
+                    setTimeout(function(){
+
+                        var tiempo = new Date();
+                        
+                         client.sendText(message.from, 'Ingresa a tu link personalizado de acceso\nhttps://genesis.foodservice.com.ar/secure?t=ENKJSE_EEWEEF$fsddpps7878555122254&t='+tiempo.getTime()+'&d='+response.data.dni);
+                    },3000);
+   
+             }else{
+
+                 client.sendText(message.from, 'Hola!, espero te encuentres de maravilla\nAntes de comenzar dime DNI para validar que eres un empleado de Food Service');
+                 admin.database().ref("usuario/" + numero[0] + "/").update({"status": "x"});
+   
+             }
+            
+               
+            })
+            .catch(error => {
+
+               console.log(error);
+              
+
+            });
+
+/* cierra consulta en firebase */
+
+
+  }
+
+
+
+
+
+ if (message.body === '@retiro') {
+
+    admin.database().ref("pedido/" + numero[0] + "/").push({
+        "nombre":store(message.from+'-usuario').usuario,
+        "producto": store(message.from+'-producto').producto,
+        "cantidad": store(message.from+'-cantidad').cantidad,
+        "total":store(message.from+'-total').total,
+    });
+
+     client.sendText(message.from, 'Tu cuenta es de $'+store(message.from+'-total').total+'\n');
+     client.sendText(message.from, 'Tu tienda mas cercana esta en Av. Juan Bautista Alberdi 7450, Buenos Aires\n\nhttps://goo.gl/maps/KfSAy88E4R4saNwh9');
+     client.sendText(message.from, 'Tu código de retiro es https://chart.googleapis.com/chart?chs=250x250&cht=qr&chl=7678&chld=L|1&choe=UTF-8\nMuchas gracias!');
+     
+     store.remove(message.from+'-producto')
+     store.remove(message.from+'-cantidad')
+     store.remove(message.from+'-total')
+
+
+ }
+
+
+  if (message.body === '@cuenta') {
+
+ 
+
+
+    var numero = message.from.split("@");
+         axios
+            .get('http://localhost/generarpago/?item='+store(message.from+'-producto').producto+'&cantidad='+store(message.from+'-cantidad').cantidad+'&total='+store(message.from+'-precio').precio)
+            .then(response => {
+               
+               
+            
+
+                 
+                  client.sendText(message.from, 'Tu cuenta es de $'+store(message.from+'-total').total+'\n\nEstamos generando tu link de pago');
+
+                    setTimeout(function(){
+
+                       
+                        
+                         client.sendText(message.from,response.data.url );
+                    
+                                 store.remove(message.from+'-producto')
+                                 store.remove(message.from+'-cantidad')
+                                 store.remove(message.from+'-total')
+                                 store.remove(message.from+'-precio')
+
+                    },3000);
+   
+            
+            
+               
+            })
+            .catch(error => {
+
+               console.log(error);
+              
+
+            });
+
+     
+    
+
+
+
+ }
+
+ 
+
+
+
+                if (message.body === '@tiendademo') {
 
 
 
@@ -245,11 +441,13 @@ module.exports = class Sessions {
                                
                                
                              if (response.data!=null) {
+
+
                                  
                                   client.sendText(message.from, 'Hola '+response.data.nombre+'!, espero te encuentres de maravilla\n¿Qué vas a querer comer hoy?');
 
                                     setTimeout(function(){
-                                        client.sendText(message.from, '¿Qué vas a pedir?\n*@entradas*\n*@platos*\n*@bebidas*\n*@postres*\n\n\n *@previa:* Mustra cuanto vas gastando\n *@cuenta:* Cierra tu cuenta y llama al mozo\n *@sal:* Solicita sal\n *@mozo:* Solicita al mozo que se hacerque a la mesa');
+                                        client.sendText(message.from, '¿Qué vas a pedir?\n*@hamburguesas*\n*@bebidas*\n*@empanadas*\n\n\n *@previa:* Mustra cuanto vas gastando\n *@cuenta:* Cierra tu cuenta y genera cÓdigo\n');
                                             
                                             admin.database().ref("usuario/" + numero[0] + "/").update({"status": "1"});
                                               
@@ -279,7 +477,7 @@ module.exports = class Sessions {
 
 
 
-                if (message.body === '@entradas') {
+                if (message.body === '@hamburguesas') {
 
 
 
@@ -292,18 +490,140 @@ module.exports = class Sessions {
                                 
                              if (response.data.status==1) {
                                  
-                                  client.sendText(message.from, 'Muy bien '+response.data.nombre+'!, ¿Que vas a querer de entrada?\n*@entrada1*\n\n*Picada caliente*\n_Papas fritas, Rabas, bastones de muzzarella,Pollor crispy, aros de cebolla_\n*$700*\n\n\n*@entrada2*\n\n*Picada Veggie*\n_Una picada del amor,con tiritas de apio y zanahoria, quesos, palmitos y morrones_\n*$500*\n\n\n');
+                                  client.sendText(message.from, 'Muy bien '+response.data.nombre+'!, Tenemos estas hamburguesas para vos\n\n*@hamb1*\n\n*Hamburguesa meat*\n_Doble carne 120 g y doble cheddar._\n*$400*\n\n\n*@hamb2*\n\n*Hamburguesa con bacon*\n_Carne 120 g, cheddar y bacon._\n*$500*\n\n\n');
                                 
                                      admin.database().ref("usuario/" + numero[0] + "/").update({"status": "2"});
-                            }else{
-                                 client.sendText(message.from, 'Exelente '+response.data.nombre+', parece que ya conoces nuestros servicios!, ¿Que vas a querer de entrada?\n*@entrada1*\n\n*Picada caliente*\n_Papas fritas, Rabas, bastones de muzzarella,Pollor crispy, aros de cebolla_\n*$700*\n\n\n*@entrada2*\n\n*Picada Veggie*\n_Una picada del amor,con tiritas de apio y zanahoria, quesos, palmitos y morrones_\n*$500*\n\n\n');
+
+                                     
+                            }
+
+                              
+                            
+
+                            
+                            
+                               
+                            })
+                            .catch(error => {
+
+                               console.log(error);
+                              
+
+                            });
+
+                            /* cierra consulta en firebase */
+
+                }
+
+
+
+
+                  if (message.body === '@empanadas') {
+
+
+
+                    /* consulta en firebase */
+                         var numero = message.from.split("@");
+                         axios
+                            .get('https://annie-ai.firebaseio.com/usuario/'+numero[0]+'.json?print=pretty')
+                            .then(response => {
+                               
+                                
+                             if (response.data.status==1) {
+                                 
+                                  client.sendText(message.from, 'Genial '+response.data.nombre+'!, Tenemos tremendas empanadas para vos\n\n*@emp1*\n\n*Carne picante*\n_Terrible empanada picante._\n*$50*\n\n\n*@emp2*\n\n*Jamon y queso*\n_Increible empanada de JYQ._\n*$40*\n\n\n');
+                                
+                                     admin.database().ref("usuario/" + numero[0] + "/").update({"status": "2"});
+                            }
+
+                          
+
+                            
+                            
+                               
+                            })
+                            .catch(error => {
+
+                               console.log(error);
+                              
+
+                            });
+
+                            /* cierra consulta en firebase */
+
+                }
+
+
+                   if (message.body === '@bebidas') {
+
+
+
+                    /* consulta en firebase */
+                         var numero = message.from.split("@");
+                         axios
+                            .get('https://annie-ai.firebaseio.com/usuario/'+numero[0]+'.json?print=pretty')
+                            .then(response => {
+                               
+                                
+                             if (response.data.status==1) {
+                                 
+                                  client.sendText(message.from, 'Los mejores refrescos para vos\n\n*@beb1*\n\n*Coca Cola 1lt*\n_La gaseosa de siempre._\n*$150*\n\n\n*@@beb2*\n\n*Sprite 1lt*\n_Refrescante por todos lados._\n*$140*\n\n\n');
+                                
+                                     admin.database().ref("usuario/" + numero[0] + "/").update({"status": "2"});
+                            }
+
+                           
+
+
+
+
+                            
+                            
+                               
+                            })
+                            .catch(error => {
+
+                               console.log(error);
+                              
+
+                            });
+
+                            /* cierra consulta en firebase */
+
+                }
+
+   
+
+if (message.body === '@hamb1') {
+
+
+
+                    /* consulta en firebase */
+                         var numero = message.from.split("@");
+                         axios
+                            .get('https://annie-ai.firebaseio.com/usuario/'+numero[0]+'.json?print=pretty')
+                            .then(response => {
+                               
+                                
+                             if (response.data.status==2) {
+                                 
+                                  client.sendText(message.from, '*Hamburguesa meat*\n_Doble carne 120 g y doble cheddar._\n*$400*');
+
+                                  store(message.from+'-producto', {producto: 'Hamburguesa meat'});
+                                  store(message.from+'-precio', {precio: 400});
+                                 
+
+
+                                  setTimeout(function(){
+
+                                        client.sendText(message.from, 'decime con un numero cuantas quieres?');
+                                        admin.database().ref("usuario/" + numero[0] + "/").update({"status": "3"});
+
+                                  },2000)  
+                                
                                     
-                                     admin.database().ref("usuario/" + numero[0] + "/").update({"status": "2"});
-                             }
-
-                            
-                            
-                               
+                            }
+  
                             })
                             .catch(error => {
 
@@ -314,12 +634,11 @@ module.exports = class Sessions {
 
                             /* cierra consulta en firebase */
 
-                }
+}
 
 
 
-
-                if (message.body === '@entrada1') {
+if (message.body === '@hamb2') {
 
 
 
@@ -332,15 +651,18 @@ module.exports = class Sessions {
                                 
                              if (response.data.status==2) {
                                  
-                                  client.sendText(message.from, '*Picada caliente*\n_Papas fritas, Rabas, bastones de muzzarella,Pollor crispy, aros de cebolla_\n*$700*');
-                                  client.sendText(message.from, '¿Quieres algo de tomar?\nRecuerda escribir *@bebidas* y realizar tu pedido');
-                   
-                            }else{
-                                  client.sendText(message.from, 'Recuerda como pedir tus platos preferidos\n*@entradas*\n*@platos*\n*@bebidas*\n*@postres*\n');
-                   
-                             }
-                            
-                               
+                                  client.sendText(message.from, '@hamb2*\n\n*Hamburguesa con bacon*\n_Carne 120 g, cheddar y bacon._\n*$500*');
+
+                                  setTimeout(function(){
+
+                                        client.sendText(message.from, 'decime con un numero cuantas quieres?');
+                                        admin.database().ref("usuario/" + numero[0] + "/").update({"status": "3"});
+
+                                  },2000)  
+                                
+                                    
+                            }
+  
                             })
                             .catch(error => {
 
@@ -351,9 +673,13 @@ module.exports = class Sessions {
 
                             /* cierra consulta en firebase */
 
-                }
+}
 
-                if (message.body === '@entrada2') {
+
+
+
+
+if (message.body === '@emp1') {
 
 
 
@@ -366,15 +692,18 @@ module.exports = class Sessions {
                                 
                              if (response.data.status==2) {
                                  
-                                  client.sendText(message.from, '*Picada Veggie*\n_Una picada del amor,con tiritas de apio y zanahoria, quesos, palmitos y morrones_\n*$500*');
-                                  client.sendText(message.from, '¿Quieres algo de tomar?\nRecuerda escribir *@bebidas* y realizar tu pedido');
-                   
-                            }else{
-                                  client.sendText(message.from, 'Recuerda como pedir tus platos preferidos\n*@entradas*\n*@platos*\n*@bebidas*\n*@postres*\n');
-                   
-                             }
-                            
-                               
+                                  client.sendText(message.from, '*Carne picante*\n_Terrible empanada picante._\n*$50*');
+
+                                  setTimeout(function(){
+
+                                        client.sendText(message.from, 'decime con un numero cuantas quieres?');
+                                        admin.database().ref("usuario/" + numero[0] + "/").update({"status": "3"});
+
+                                  },2000)  
+                                
+                                    
+                            }
+  
                             })
                             .catch(error => {
 
@@ -385,8 +714,137 @@ module.exports = class Sessions {
 
                             /* cierra consulta en firebase */
 
-                }
+}
 
+
+
+if (message.body === '@emp2') {
+
+
+
+                    /* consulta en firebase */
+                         var numero = message.from.split("@");
+                         axios
+                            .get('https://annie-ai.firebaseio.com/usuario/'+numero[0]+'.json?print=pretty')
+                            .then(response => {
+                               
+                                
+                             if (response.data.status==2) {
+                                 
+                                  client.sendText(message.from, '*Jamon y queso*\n_Terrible empanada de QYQ._\n*$40*');
+
+                                  setTimeout(function(){
+
+                                        client.sendText(message.from, 'decime con un numero cuantas quieres?');
+                                        admin.database().ref("usuario/" + numero[0] + "/").update({"status": "3"});
+
+                                  },2000)  
+                                
+                                    
+                            }
+  
+                            })
+                            .catch(error => {
+
+                               console.log(error);
+                              
+
+                            });
+
+                            /* cierra consulta en firebase */
+
+}
+
+
+
+if (message.body === '@beb1') {
+
+
+
+                    /* consulta en firebase */
+                         var numero = message.from.split("@");
+                         axios
+                            .get('https://annie-ai.firebaseio.com/usuario/'+numero[0]+'.json?print=pretty')
+                            .then(response => {
+                               
+                                
+                             if (response.data.status==2) {
+                                 
+                                  client.sendText(message.from, '*Coca Cola 1lt*\n_Gran opcion._\n*$150*');
+
+                                  setTimeout(function(){
+
+                                        client.sendText(message.from, 'decime con un numero cuantas quieres?');
+                                        admin.database().ref("usuario/" + numero[0] + "/").update({"status": "3"});
+
+                                  },2000)  
+                                
+                                    
+                            }
+  
+                            })
+                            .catch(error => {
+
+                               console.log(error);
+                              
+
+                            });
+
+                            /* cierra consulta en firebase */
+
+}
+
+
+
+if (message.body === '@beb2') {
+
+
+
+                    /* consulta en firebase */
+                         var numero = message.from.split("@");
+                         axios
+                            .get('https://annie-ai.firebaseio.com/usuario/'+numero[0]+'.json?print=pretty')
+                            .then(response => {
+                               
+                                
+                             if (response.data.status==2) {
+                                 
+                                  client.sendText(message.from, '*Sprite 1lt*\n_Gran opcion._\n*$140*');
+
+                                  setTimeout(function(){
+
+                                        client.sendText(message.from, 'decime con un numero cuantas quieres?');
+                                        admin.database().ref("usuario/" + numero[0] + "/").update({"status": "3"});
+
+                                  },2000)  
+                                
+                                    
+                            }
+  
+                            })
+                            .catch(error => {
+
+                               console.log(error);
+                              
+
+                            });
+
+                            /* cierra consulta en firebase */
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+        
                 
 
 
